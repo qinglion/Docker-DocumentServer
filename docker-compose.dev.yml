@@ -1,0 +1,132 @@
+services:
+  onlyoffice-documentserver-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: onlyoffice-documentserver-dev
+    depends_on:
+      - onlyoffice-postgresql-dev
+      - onlyoffice-rabbitmq-dev
+      - onlyoffice-redis-dev
+    environment:
+      - DB_TYPE=postgres
+      - DB_HOST=onlyoffice-postgresql-dev
+      - DB_PORT=5432
+      - DB_NAME=onlyoffice
+      - DB_USER=onlyoffice
+      - DB_PWD=onlyoffice
+      - AMQP_URI=amqp://guest:guest@onlyoffice-rabbitmq-dev
+      - REDIS_SERVER_HOST=onlyoffice-redis-dev
+      - REDIS_SERVER_PORT=6379
+      # 开发环境配置
+      - NODE_ENV=development-linux
+      - GENERATE_FONTS=true   # 生成字体文件以解决AllFonts.js 404错误
+      - JWT_ENABLED=false     # 开发时禁用JWT以便调试
+      # 允许私有IP访问（开发环境）
+      - ALLOW_PRIVATE_IP_ADDRESS=true
+      - ALLOW_META_IP_ADDRESS=true
+    ports:
+      - '8080:80'   # 使用8080端口避免与其他服务冲突
+      - '8443:443'
+    stdin_open: true
+    restart: unless-stopped
+    stop_grace_period: 60s
+    volumes:
+      # 数据持久化
+      - onlyoffice_data:/var/www/onlyoffice/Data
+      - onlyoffice_logs:/var/log/onlyoffice
+      - onlyoffice_cache:/var/lib/onlyoffice/documentserver/App_Data/cache/files
+      - onlyoffice_files:/var/www/onlyoffice/documentserver-example/public/files
+      - onlyoffice_fonts:/usr/share/fonts
+      
+      # 前端源代码挂载（用于开发）
+      - ../DocumentServer/web-apps:/opt/src/web-apps:ro
+      - ../DocumentServer/sdkjs:/opt/src/sdkjs:ro
+      - ../DocumentServer/dictionaries:/var/www/onlyoffice/documentserver/dictionaries:rw
+      - ../DocumentServer/core-fonts:/var/www/onlyoffice/documentserver/core-fonts:rw
+      
+      # 开发配置挂载
+      - ../DocumentServer/server/Common/config/development-linux.json:/var/www/onlyoffice/documentserver/server/Common/config/development-linux.json:ro
+      
+      # 开发工具和脚本
+      - ./dev-scripts:/opt/dev-scripts:ro
+      
+      # Node.js 模块缓存（可选，提高性能）
+      - node_modules_cache:/var/www/onlyoffice/documentserver/server/node_modules
+
+  onlyoffice-rabbitmq-dev:
+    container_name: onlyoffice-rabbitmq-dev
+    image: rabbitmq:3.12-management
+    restart: unless-stopped
+    ports:
+      - '15672:15672'  # 管理界面
+      - '5672:5672'    # AMQP端口
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  onlyoffice-postgresql-dev:
+    container_name: onlyoffice-postgresql-dev
+    image: postgres:15
+    restart: unless-stopped
+    ports:
+      - '5432:5432'  # 暴露端口便于外部连接调试
+    environment:
+      - POSTGRES_DB=onlyoffice
+      - POSTGRES_USER=onlyoffice
+      - POSTGRES_PASSWORD=onlyoffice
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+      # 数据库初始化脚本
+      - ./dev-scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+
+  onlyoffice-redis-dev:
+    container_name: onlyoffice-redis-dev
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - '6379:6379'  # 暴露端口便于调试
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  # 开发工具容器
+  onlyoffice-dev-tools:
+    container_name: onlyoffice-dev-tools
+    image: node:18-alpine
+    working_dir: /workspace
+    volumes:
+      - ../DocumentServer:/workspace/DocumentServer:rw
+      - ../build_tools:/workspace/build_tools:rw
+      - ./dev-scripts:/workspace/dev-scripts:rw
+    command: tail -f /dev/null  # 保持容器运行
+    profiles:
+      - tools  # 使用 profile 控制是否启动
+
+volumes:
+  onlyoffice_data:
+    name: onlyoffice_dev_data
+  onlyoffice_logs:
+    name: onlyoffice_dev_logs
+  onlyoffice_cache:
+    name: onlyoffice_dev_cache
+  onlyoffice_files:
+    name: onlyoffice_dev_files
+  onlyoffice_fonts:
+    name: onlyoffice_dev_fonts
+  node_modules_cache:
+    name: onlyoffice_dev_node_modules
+  postgresql_data:
+    name: onlyoffice_dev_postgresql
+  rabbitmq_data:
+    name: onlyoffice_dev_rabbitmq
+  redis_data:
+    name: onlyoffice_dev_redis
+
+networks:
+  default:
+    name: onlyoffice-dev-network
+    driver: bridge 
