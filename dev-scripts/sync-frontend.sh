@@ -23,15 +23,29 @@ sleep 5
 # 同步 web-apps 构建产物
 echo "📦 同步 web-apps 构建产物..."
 docker exec $CONTAINER_NAME bash -c "
-    if [ -d /opt/src/web-apps/deploy ]; then
-        cp -rf /opt/src/web-apps/deploy/* /var/www/onlyoffice/documentserver/web-apps/
-        echo '✅ web-apps 构建产物同步完成'
+    if [ -d /opt/src/web-apps/deploy/web-apps ]; then
+        echo '🔄 同步web-apps构建产物到容器...'
+        cp -rf /opt/src/web-apps/deploy/web-apps/* /var/www/onlyoffice/documentserver/web-apps/
+        echo '✅ web-apps 构建产物同步完成（包含console.log）'
+        
+        # 重新生成gzip文件以包含最新更改
+        echo '🔄 重新生成web-apps gzip文件...'
+        cd /var/www/onlyoffice/documentserver/web-apps
+        find . -name '*.js' -not -name '*.min.js' | while read file; do
+            if [ -f \"\${file}.gz\" ]; then
+                gzip -c \"\$file\" > \"\${file}.gz.new\" && mv \"\${file}.gz.new\" \"\${file}.gz\"
+                echo \"  ✅ 更新: \${file}.gz\"
+            fi
+        done
+        echo '✅ web-apps gzip文件重新生成完成'
     else
-        echo '⚠️  web-apps 构建产物目录不存在，使用源代码: /opt/src/web-apps/deploy'
-        if [ -d /opt/src/web-apps ]; then
-            cp -rf /opt/src/web-apps/* /var/www/onlyoffice/documentserver/web-apps/
-            echo '✅ web-apps 源代码同步完成'
+        echo '⚠️  web-apps 构建产物目录不存在: /opt/src/web-apps/deploy/web-apps'
+        echo '🔍 检查可用目录:'
+        ls -la /opt/src/web-apps/ || echo '   /opt/src/web-apps/ 不存在'
+        if [ -d /opt/src/web-apps/deploy ]; then
+            ls -la /opt/src/web-apps/deploy/ || echo '   /opt/src/web-apps/deploy/ 不存在'
         fi
+        echo '❌ 无法同步web-apps构建产物'
     fi
 "
 
@@ -39,11 +53,12 @@ docker exec $CONTAINER_NAME bash -c "
 echo "📦 同步 sdkjs 构建产物..."
 docker exec $CONTAINER_NAME bash -c "
     if [ -d /opt/src/sdkjs/deploy/sdkjs ]; then
+        echo '🔄 同步sdkjs构建产物到容器...'
         cp -rf /opt/src/sdkjs/deploy/sdkjs/* /var/www/onlyoffice/documentserver/sdkjs/
         echo '✅ sdkjs 构建产物同步完成（包含console.log）'
         
         # 重新生成gzip文件以包含最新更改
-        echo '🔄 重新生成gzip文件...'
+        echo '🔄 重新生成sdkjs gzip文件...'
         cd /var/www/onlyoffice/documentserver/sdkjs
         find . -name '*.js' -not -name '*.min.js' | while read file; do
             if [ -f \"\${file}.gz\" ]; then
@@ -51,13 +66,15 @@ docker exec $CONTAINER_NAME bash -c "
                 echo \"  ✅ 更新: \${file}.gz\"
             fi
         done
-        echo '✅ gzip文件重新生成完成'
+        echo '✅ sdkjs gzip文件重新生成完成'
     else
-        echo '⚠️  sdkjs 构建产物目录不存在，使用源代码: /opt/src/sdkjs/deploy/sdkjs'
-        if [ -d /opt/src/sdkjs ]; then
-            cp -rf /opt/src/sdkjs/* /var/www/onlyoffice/documentserver/sdkjs/
-            echo '✅ sdkjs 源代码同步完成'
+        echo '⚠️  sdkjs 构建产物目录不存在: /opt/src/sdkjs/deploy/sdkjs'
+        echo '🔍 检查可用目录:'
+        ls -la /opt/src/sdkjs/ || echo '   /opt/src/sdkjs/ 不存在'
+        if [ -d /opt/src/sdkjs/deploy ]; then
+            ls -la /opt/src/sdkjs/deploy/ || echo '   /opt/src/sdkjs/deploy/ 不存在'
         fi
+        echo '❌ 无法同步sdkjs构建产物'
     fi
 "
 

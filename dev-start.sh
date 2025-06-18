@@ -56,14 +56,21 @@ docker-compose -f docker-compose.dev.yml ps
 # 构建前端资源
 echo "🔨 构建前端资源..."
 if [ -d "../DocumentServer/web-apps/build" ]; then
+    echo "🔨 构建 web-apps (开发模式 - 保留console.log)..."
     cd ../DocumentServer/web-apps/build
     if [ ! -d "node_modules" ]; then
         echo "📥 安装 web-apps 依赖..."
         npm install
     fi
-    echo "🔨 执行 Grunt 构建..."
-    npx grunt
-    echo "✅ web-apps 构建完成"
+    if [ -f "Gruntfile.js" ]; then
+        echo "🔨 执行 web-apps Grunt 构建 (开发模式)..."
+        # 使用新添加的开发模式任务，跳过terser压缩以保留console.log
+        npx grunt dev
+        echo "✅ web-apps 构建完成 (开发模式 - 已保留console.log)"
+    else
+        echo "⚠️  未找到 Gruntfile.js，使用默认构建..."
+        npx grunt
+    fi
     cd - > /dev/null
 else
     echo "⚠️  未找到 web-apps/build 目录，跳过前端构建"
