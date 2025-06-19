@@ -8,7 +8,7 @@ ARG IMAGE=${COMPANY_NAME}/documentserver${PRODUCT_EDITION}${UCS_PREFIX}:${PULL_T
 
 ### Build main-release ###
 
-FROM ${COMPANY_NAME}/4testing-documentserver${PRODUCT_EDITION}:${PULL_TAG} as documentserver-stable
+FROM onlyoffice/4testing-documentserver${PRODUCT_EDITION}:${PULL_TAG} as documentserver-stable
 
 ### Rebuild stable images with secure updates 
 FROM ${IMAGE} as documentserver-stable-rebuild
