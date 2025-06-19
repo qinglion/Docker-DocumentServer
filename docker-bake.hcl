@@ -2,6 +2,10 @@ variable "TAG" {
     default = ""
 }
 
+variable "REGISTRY" {
+    default = "docker.io"
+}
+
 variable "SHORTER_TAG" {
     default = ""
 }
@@ -90,8 +94,8 @@ target "documentserver" {
     target = "documentserver"
     dockerfile = "${DOCKERFILE}"
     tags = [
-           "docker.io/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${TAG}",
-           equal("nightly",BUILD_CHANNEL) ? "docker.io/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:latest": "",
+           "${REGISTRY}/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${TAG}",
+           equal("nightly",BUILD_CHANNEL) ? "${REGISTRY}/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:latest": "",
            ]
     platforms = ["${PLATFORM}"]
     args = {
@@ -107,11 +111,11 @@ target "documentserver" {
 target "documentserver-stable" {
     target = "documentserver-stable"
     dockerfile = "production.dockerfile"
-    tags = ["docker.io/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${TAG}",
-            "docker.io/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${SHORTER_TAG}",
-            "docker.io/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${SHORTEST_TAG}",
-            "docker.io/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:latest",
-            equal("-ee",PRODUCT_EDITION) ? "docker.io/${COMPANY_NAME}4enterprise/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${TAG}": "",]
+    tags = ["${REGISTRY}/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${TAG}",
+            "${REGISTRY}/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${SHORTER_TAG}",
+            "${REGISTRY}/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${SHORTEST_TAG}",
+            "${REGISTRY}/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:latest",
+            equal("-ee",PRODUCT_EDITION) ? "${REGISTRY}/${COMPANY_NAME}4enterprise/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${TAG}": "",]
     platforms = ["linux/amd64", "linux/arm64"]
     args = {
         "PULL_TAG": "${PULL_TAG}"
@@ -125,7 +129,7 @@ target "documentserver-ucs" {
     target = "documentserver"
     dockerfile = "${DOCKERFILE}"
     tags = [
-           "docker.io/${COMPANY_NAME}/${PRODUCT_NAME}${PRODUCT_EDITION}-ucs:${TAG}"
+           "${REGISTRY}/${COMPANY_NAME}/${PRODUCT_NAME}${PRODUCT_EDITION}-ucs:${TAG}"
            ]
     platforms = ["linux/amd64", "linux/arm64"]
     args = {
@@ -143,7 +147,7 @@ target "documentserver-ucs" {
 target "documentserver-nonexample" {
     target = "documentserver-nonexample"
     dockerfile = "production.dockerfile"
-    tags = [ "docker.io/${COMPANY_NAME}/${PRODUCT_NAME}${PREFIX_NAME}${PRODUCT_EDITION}:${TAG}-nonexample" ]
+    tags = [ "${REGISTRY}/${COMPANY_NAME}/${PRODUCT_NAME}${PREFIX_NAME}${PRODUCT_EDITION}:${TAG}-nonexample" ]
     platforms = ["linux/amd64", "linux/arm64"]
     args = {
         "PULL_TAG": "${PULL_TAG}"
@@ -156,12 +160,12 @@ target "documentserver-nonexample" {
 target "documentserver-stable-rebuild" {
     target = "documentserver-stable-rebuild"
     dockerfile = "production.dockerfile"
-    tags = equal("true",UCS_REBUILD) ? ["docker.io/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}-ucs:${TAG}",] : [
-                                        "docker.io/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${TAG}",
-                equal("",PREFIX_NAME) ? "docker.io/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${SHORTER_TAG}": "",
-             equal("true",PUSH_MAJOR) ? "docker.io/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${SHORTEST_TAG}": "",
-                equal("",PREFIX_NAME) && equal("true",LATEST) ? "docker.io/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:latest": "",
-         equal("-ee",PRODUCT_EDITION) && equal("",PREFIX_NAME) ? "docker.io/${COMPANY_NAME}4enterprise/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${TAG}": "",
+    tags = equal("true",UCS_REBUILD) ? ["${REGISTRY}/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}-ucs:${TAG}",] : [
+                                        "${REGISTRY}/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${TAG}",
+                equal("",PREFIX_NAME) ? "${REGISTRY}/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${SHORTER_TAG}": "",
+             equal("true",PUSH_MAJOR) ? "${REGISTRY}/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${SHORTEST_TAG}": "",
+                equal("",PREFIX_NAME) && equal("true",LATEST) ? "${REGISTRY}/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:latest": "",
+         equal("-ee",PRODUCT_EDITION) && equal("",PREFIX_NAME) ? "${REGISTRY}/${COMPANY_NAME}4enterprise/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${TAG}": "",
                                  ]
     platforms = ["linux/amd64", "linux/arm64"]
     args = {
