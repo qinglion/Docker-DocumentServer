@@ -116,6 +116,7 @@ jobs:
           BUILD_NUMBER: ${{ github.event.inputs.build }}
           EDITION: ${{ matrix.edition }}
           IMAGE: ${{ matrix.image }}
+          PACKAGE_BASEURL: ${{ secrets.REPO_BASEURL }}
         run: |
           set -eux
 
