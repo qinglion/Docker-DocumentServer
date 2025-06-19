@@ -54,7 +54,7 @@ jobs:
           REGISTRY: ${{ secrets.DOCKER_HUB_REGISTRY }}
         run: |
           set -eux
-          TESTING_IMAGE=onlyoffice/4testing-${PRODUCT_NAME}${PRODUCT_EDITION}
+          TESTING_IMAGE=${COMPANY_NAME}/4testing-${PRODUCT_NAME}${PRODUCT_EDITION}
             export PRODUCT_EDITION
             export PULL_TAG=${VERSION}
             export TAG=${VERSION%.*}.${RELEASE_NUMBER}
