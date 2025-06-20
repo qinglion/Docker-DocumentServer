@@ -12,8 +12,8 @@ RUN apt-get update -y && \
 	# Clone sdkjs and web-apps from qinglion repositories
 	rm -rf /var/www/onlyoffice/documentserver/sdkjs && \
 	rm -rf /var/www/onlyoffice/documentserver/web-apps && \
-	git clone --depth 1 https://github.com/qinglion/sdkjs.git /var/www/onlyoffice/documentserver/sdkjs && \
-	git clone --depth 1 https://github.com/qinglion/web-apps.git /var/www/onlyoffice/documentserver/web-apps && \
+	git clone --depth 1 -b develop https://github.com/qinglion/sdkjs.git /var/www/onlyoffice/documentserver/sdkjs && \
+	git clone --depth 1 -b develop https://github.com/qinglion/web-apps.git /var/www/onlyoffice/documentserver/web-apps && \
 	sed -i '/documentserver-static-gzip.sh ${ONLYOFFICE_DATA_CONTAINER}/d' /app/ds/run-document-server.sh && \
 	#Set Up Debug Logging
 	sed -i 's/WARN/ALL/g' /etc/onlyoffice/documentserver/log4js/production.json && \
