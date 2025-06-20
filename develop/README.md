@@ -12,17 +12,10 @@
 
 ## 使用方法
 
-### 拉取开发镜像
-
-```bash
-docker pull ccr.ccs.tencentyun.com/qinglion/documentserver:latest
-docker tag ccr.ccs.tencentyun.com/qinglion/documentserver:latest qinglion-documentserver
-```
-
 ### 运行开发镜像
 
 ```bash
-docker run -i -t -p 80:80 --restart=always -e ALLOW_PRIVATE_IP_ADDRESS=true qinglion-documentserver
+docker run -i -t -p 8080:80 --restart=always ccr.ccs.tencentyun.com/qinglion/documentserver:latest
 ```
 
 ### 访问编辑器
