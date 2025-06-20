@@ -3,7 +3,7 @@ variable "TAG" {
 }
 
 variable "REGISTRY" {
-    default = "docker.io"
+    default = "${REGISTRY}"
 }
 
 variable "SHORTER_TAG" {
@@ -114,7 +114,7 @@ target "documentserver-stable" {
     tags = ["${REGISTRY}/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${TAG}",
             "${REGISTRY}/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${SHORTER_TAG}",
             "${REGISTRY}/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${SHORTEST_TAG}",
-            "${REGISTRY}/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:latest",
+            equal("true",LATEST) ? "${REGISTRY}/${COMPANY_NAME}/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:latest": "",
             equal("-ee",PRODUCT_EDITION) ? "${REGISTRY}/${COMPANY_NAME}4enterprise/${PREFIX_NAME}${PRODUCT_NAME}${PRODUCT_EDITION}:${TAG}": "",]
     platforms = ["linux/amd64", "linux/arm64"]
     args = {
