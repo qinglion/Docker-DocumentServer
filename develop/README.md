@@ -15,7 +15,7 @@
 ### 运行开发镜像
 
 ```bash
-docker run -i -t -p 8080:80 --restart=always ccr.ccs.tencentyun.com/qinglion/documentserver:latest
+docker run -i -t -p 8080:80 --restart=always -e JWT_ENABLED=false -e ALLOW_META_IP_ADDRESS=true -e ALLOW_PRIVATE_IP_ADDRESS=true ccr.ccs.tencentyun.com/qinglion/documentserver:latest
 ```
 
 ### 访问编辑器
